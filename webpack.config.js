@@ -1,35 +1,41 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const fs = require('fs')
-
-fs.copyFileSync('../src/index.js', './prevent-import-loader.js')
 
 module.exports = {
   mode: 'production',
-  entry: './src/index.js',
+  entry: './src/example/index.ts',
+  resolve: {
+    extensions: ['.ts', '.js'],
+  },
   output: {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
   },
+  optimization: {
+    minimize: false,
+  },
   module: {
     rules: [
       {
-        test: /\.(js?)$/,
+        test: /\.(ts)$/,
         use: [
           {
-            loader: './prevent-import-loader.js',
+            loader: './src/prevent-import-loader.js',
             options: {
               commentKeywords: {
-                '@only-import-in-pc': process.env.DEVICE === 'mobile',
-                '@only-import-in-mobile': process.env.DEVICE === 'pc',
+                '@prevent-import-in-mobile': process.env.DEVICE === 'mobile',
+                '@prevent-import-in-pc': process.env.DEVICE === 'pc',
               },
               parserPlugins: [],
             },
           },
+          {
+            loader: 'ts-loader',
+          },
         ],
         exclude: /node_modules/,
-      }
+      },
     ]
   },
   devServer: {
